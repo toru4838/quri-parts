@@ -8,7 +8,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import abstractmethod, abstractproperty
+from abc import abstractmethod
 from collections import Counter
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass
@@ -16,7 +16,7 @@ from typing import Protocol, Union
 
 from typing_extensions import TypeAlias
 
-from quri_parts.circuit import ImmutableQuantumCircuit
+from quri_parts.circuit import ImmutableQuantumCircuit, QuantumCircuit
 
 #: SamplingCounts represents count statistics of repeated sampling or the
 #: measurement probabilities of a quantum circuit. Keys are observed bit
@@ -28,7 +28,8 @@ SamplingCounts: TypeAlias = Mapping[int, Union[float, int]]
 class SamplingResult(Protocol):
     """A result of a sampling job."""
 
-    @abstractproperty
+    @abstractmethod
+    @property
     def counts(self) -> SamplingCounts:
         """Measurement counts obtained by a sampling measurement."""
         ...
@@ -75,9 +76,43 @@ class SamplingBackend(Protocol):
     """A quantum computing backend that can perform a sampling measurement."""
 
     @abstractmethod
-    def sample(self, circuit: ImmutableQuantumCircuit, n_shots: int) -> SamplingJob:
+    def sample(
+        self, circuit: QuantumCircuit | ImmutableQuantumCircuit, n_shots: int
+    ) -> SamplingJob:
         """Perform a sampling measurement of a circuit."""
         ...
+
+
+class EstimateResult(Protocol):
+    """A result of an estimation job."""
+
+    @abstractmethod
+    @property
+    def value(self) -> complex:
+        """Estimated value."""
+
+
+class EstimateJob(Protocol):
+    """A job for an estimation."""
+
+    @abstractmethod
+    def result(self) -> EstimateResult:
+        """Returns the result of the estimation job
+
+        If the job is not complete, this method waits until the job
+        finishes.
+        """
+        ...
+
+
+class EstimateBackend(Protocol):
+    """A backend that can perform an estimation."""
+
+    @abstractmethod
+    def estimate(
+        self, circuit: QuantumCircuit | ImmutableQuantumCircuit
+    ) -> EstimateJob:
+        """Estimate an expectation value of a given operator and quantum circuit."""
 
 
 class BackendError(Exception):
