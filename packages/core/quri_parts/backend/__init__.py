@@ -28,8 +28,8 @@ SamplingCounts: TypeAlias = Mapping[int, Union[float, int]]
 class SamplingResult(Protocol):
     """A result of a sampling job."""
 
-    @abstractmethod
     @property
+    @abstractmethod
     def counts(self) -> SamplingCounts:
         """Measurement counts obtained by a sampling measurement."""
         ...
@@ -86,8 +86,8 @@ class SamplingBackend(Protocol):
 class EstimateResult(Protocol):
     """A result of an estimation job."""
 
-    @abstractmethod
     @property
+    @abstractmethod
     def value(self) -> complex:
         """Estimated value."""
 
